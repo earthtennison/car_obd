@@ -24,14 +24,23 @@ def bytes_to_hex(bs):
         h += ("0" * (2 - len(bh))) + bh
     return h
 
-def hex_to_int(h):
-    return int(h, 0)
+def hex_to_int(h, is_low_to_high=True):
+    HEX_PER_BYTE = 2
+    if is_low_to_high == True:
+        h = "".join(reversed([h[i:i + 2] for i in range(0, len(h), 2)]))
+
+    if len(h)>2 and h[:2] == "0x":
+        return int(h, 0)
+    else:
+        return int(h, 16)
 
 def receive_message(client_socket):
     try:
-        # read data
         # TODO  interpret data
-        message = client_socket.recv(1024)
+        # protocol length
+        protocol_header = bytes_to_hex(client_socket.recv(2))
+        message_length = hex_to_int(bytes_to_hex(client_socket.recv(2)))
+        message = client_socket.recv(message_length - 4)
         message = bytes_to_hex(message)
         return message
 
@@ -49,12 +58,12 @@ while True:
             client_socket, client_address = server_socket.accept()
             print("new connection from {}".format(client_address))
 
-            # received 1001 launch package
-            launch_message = receive_message(client_socket)
+            # received 1001 login package
+            login_message = receive_message(client_socket)
 
-            print(launch_message)
+            print(login_message)
             # If False - obd disconnected before it sent data
-            if launch_message is False:
+            if login_message is False:
                 continue
 
             # register new device accepted socket
