@@ -24,27 +24,42 @@ def bytes_to_hex(bs):
 
 def hex_to_int(h, is_low_to_high=True):
     HEX_PER_BYTE = 2
-    if is_low_to_high == True:
-        h = "".join(reversed([h[i:i + 2] for i in range(0, len(h), 2)]))
-
     if len(h)>2 and h[:2] == "0x":
+        if is_low_to_high == True:
+            h = h[:2] + "".join(reversed([h[i:i + 2] for i in range(2, len(h), 2)]))
         return int(h, 0)
     else:
+        if is_low_to_high == True:
+            h = "".join(reversed([h[i:i + 2] for i in range(0, len(h), 2)]))
         return int(h, 16)
+
+def hex_to_ascii(h):
+    bytes_object = bytes.fromhex(h)
+    return bytes_object.decode("ASCII")
+
+a = {"name": "earth", "compatny": "motorhub"}
 
 def receive_message(client_socket):
     try:
         # TODO  interpret data
-        # protocol length
-        protocol_header = bytes_to_hex(client_socket.recv(2))
-        message_length = hex_to_int(bytes_to_hex(client_socket.recv(2)))
-        message = client_socket.recv(message_length - 4)
+        # protocol length 2+2+1+20+2
+        header = client_socket.recv(27)
+        print(bytes_to_hex(header))
+        head = bytes_to_hex(header[:2])
+        if head != "4040":
+            return None, None
+        message_length = hex_to_int(bytes_to_hex(header[2:4]))
+        version = bytes_to_hex(header[4:5])
+        device_id = (header[5:25]).decode().strip()
+        command_type = bytes_to_hex(header[25:27])
+
+        message = client_socket.recv(message_length - 27)
         message = bytes_to_hex(message)
-        return message
+        return message, device_id
 
     except Exception as e:
         print(e)
-        return False
+        return False, False
 
 def send_heartbeat():
     
@@ -59,7 +74,7 @@ while True:
             print("new connection from {}".format(client_address))
 
             # received 1001 login package
-            login_message = receive_message(client_socket)
+            login_message, device_id = receive_message(client_socket)
 
             print(login_message)
             # If False - obd disconnected before it sent data
@@ -69,16 +84,25 @@ while True:
             # register new device accepted socket
             sockets_list.append(client_socket)
 
-            # TODO save device id to clients dict
-            clients[client_socket] = "obd1"
+            # device_id contains 13 digits
+            clients[client_socket] = device_id
 
-
-
-
+            # TODO send heartbeat package
+            # client_socket.send()
 
         # else the socket send new message
         else:
-            message = receive_message(notified_socket)
+            count = 0
+            while count < 2 :
+                message, _ = receive_message(notified_socket)
+                if message is None:
+                    # try receive again
+                    # print("found no header find header again")
+                    pass
+                else:
+                    break
+                count += 1
+
             if message is False:
                 print('Closed connection from: {}'.format(clients[notified_socket]))
 
@@ -88,6 +112,7 @@ while True:
                 # Remove from our list of users
                 del clients[notified_socket]
 
-            device_id = clients[notified_socket]
+                device_id = clients[notified_socket]
+
             print("Received message from {} :\n{}".format(device_id, message))
 
