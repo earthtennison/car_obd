@@ -46,6 +46,8 @@ def receive_message(client_socket):
         print(e)
         return False
 
+def send_heartbeat():
+    
 
 while True:
     # wait until socket is ready to read
