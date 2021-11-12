@@ -60,8 +60,6 @@ def receive_message(client_socket):
     except Exception as e:
         print(e)
         return False, False
-
-def send_heartbeat():
     
 
 while True:
@@ -75,7 +73,7 @@ while True:
 
             # received 1001 login package
             login_message, device_id = receive_message(client_socket)
-
+            print('Device ID is {}'.format(device_id)
             print(login_message)
             # If False - obd disconnected before it sent data
             if login_message is False:
