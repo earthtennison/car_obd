@@ -1,7 +1,8 @@
 import binascii
 from binascii import unhexlify
 import datetime
-    
+import time
+
 def ip_to_hex(ip):
     ip_hex = ''
     ip_split = ip.split('.') 
@@ -16,9 +17,13 @@ def find_length(x):
     return byte_length
 
 def get_datetime():
-    time_stamp = datetime.datetime.utcnow().strftime('%Y%m%d%H%M%S%f')
-    time_stamp_hex = hex(int(time_stamp))
-    return time_stamp_hex[2:]
+    time_stamp = int(time.time())
+    print(datetime.datetime.fromtimestamp(time_stamp).strftime('%Y-%m-%d %H:%M:%S'))
+    time_stamp_hex = hex(time_stamp)
+    #Convert Hex to "Low to High", Hex per byte = 2
+    time_stamp_hex_invert = "".join(reversed([time_stamp_hex[i:i + 2] for i in range(2, len(time_stamp_hex), 2)]))
+    return time_stamp_hex_invert
+
 
 def login_response(device_id, ip, port):
     #4040 is in Hexadecimal
@@ -50,13 +55,17 @@ device_id = bytes('213LE2019005009','utf-8')
 print(device_id.hex())
 ip = '35.240.241.234'
 x = ip_to_hex(ip)
-print(x)
-print(unhexlify(x))
-print(unhexlify(device_id.hex()))
-print(unhexlify(x+device_id.hex()))
 
-time_stamp = datetime.datetime.utcnow().strftime('%Y%m%d%H%M%S%f')
-time_stamp_hex = hex(int(time_stamp))
-print(time_stamp_hex)
-#print(unhexlify(get_datetime()))
+
+print(datetime.datetime.now())
+x = get_datetime()
+y = unhexlify(x)
+z = bytes.fromhex(x)
+print(x)
+print(y)
+print(z)
+
 #original package = 404029000431303031313132353239393837000000000000009001FFFFFFFF0000C1DE7952A5DD0D0A
+# print(unhexlify('404029000431303031313132353239393837000000000000009001FFFFFFFF0000C1DE7952A5DD0D0A'))
+
+#edit time and date
