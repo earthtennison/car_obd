@@ -46,14 +46,18 @@ def login_response(device_id, ip= '35.240.241.234', port="1234"):
     command_type = '9001' #command type 9001 means login response package
     ip_hex = ip_to_hex(ip) #ip = '35.240.241.234'
     port_hex = int_to_hexstring(port,low_to_high=True, len_string=4)
-    utc_time = get_datetime()
+    # utc_time = get_datetime()
+    utc_time = "C1DE7952"
 
     crc_util = CRC()
     # hexstring to bytesarray
     data_for_crc = header + package_length + version + device_id + command_type + ip_hex + port_hex + utc_time
+    data_for_crc = data_for_crc.upper()
     print(data_for_crc)
     data_for_crc = unhexlify(data_for_crc)
     crc = crc_util.make_crc(data_for_crc, len(data_for_crc))
+    # low to high
+    crc = "".join(reversed([crc[i:i + 2] for i in range(0, len(crc), 2)]))
     print(crc)
     tail = '0D0A'
 
