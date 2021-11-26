@@ -28,3 +28,6 @@ while True:
     print("Send {}...".format(data[:10]))
     # hold
     input()
+    heartbeat = client_socket.recv(41)
+    print(heartbeat)
+

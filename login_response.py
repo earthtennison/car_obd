@@ -37,7 +37,7 @@ def get_datetime():
     time_stamp_hex_invert = "".join(reversed([time_stamp_hex[i:i + 2] for i in range(2, len(time_stamp_hex), 2)]))
     return time_stamp_hex_invert
 
-def login_response(device_id, ip= '35.240.241.234', port="1234"):
+def login_response(device_id, ip= '35.240.241.234', port=1234):
     #4040 is in Hexadecimal
     header = '4040'
     package_length = "2900"
@@ -53,12 +53,12 @@ def login_response(device_id, ip= '35.240.241.234', port="1234"):
     # hexstring to bytesarray
     data_for_crc = header + package_length + version + device_id + command_type + ip_hex + port_hex + utc_time
     data_for_crc = data_for_crc.upper()
-    print(data_for_crc)
+    # print(data_for_crc)
     data_for_crc = unhexlify(data_for_crc)
     crc = crc_util.make_crc(data_for_crc, len(data_for_crc))
     # low to high
     crc = "".join(reversed([crc[i:i + 2] for i in range(0, len(crc), 2)]))
-    print(crc)
+    # print(crc)
     tail = '0D0A'
 
     # temp = header + version + device_id + command_type + ip_hex + port_hex + utc_time + crc + tail

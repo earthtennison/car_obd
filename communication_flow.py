@@ -1,5 +1,6 @@
 import socket
 import select
+from login_response import login_response
 
 IP = "0.0.0.0"
 PORT = 1234
@@ -37,14 +38,13 @@ def hex_to_ascii(h):
     bytes_object = bytes.fromhex(h)
     return bytes_object.decode("ASCII")
 
-a = {"name": "earth", "compatny": "motorhub"}
 
 def receive_message(client_socket):
     try:
         # TODO  interpret data
         # protocol length 2+2+1+20+2
         header = client_socket.recv(27)
-        print(bytes_to_hex(header))
+        # print(bytes_to_hex(header))
         head = bytes_to_hex(header[:2])
         if head != "4040":
             return None, None
@@ -73,8 +73,8 @@ while True:
 
             # received 1001 login package
             login_message, device_id = receive_message(client_socket)
-            print('Device ID is {}'.format(device_id)
-            print(login_message)
+            print('Device ID is {}'.format(device_id))
+            print("login message", login_message)
             # If False - obd disconnected before it sent data
             if login_message is False:
                 continue
@@ -85,13 +85,15 @@ while True:
             # device_id contains 13 digits
             clients[client_socket] = device_id
 
-            # TODO send heartbeat package
-            # client_socket.send()
+            # send heartbeat login package
+            send_data = login_response(device_id, ip="35.240.241.234", port=1234)
+            print("send_data", send_data)
+            client_socket.send(send_data)
 
         # else the socket send new message
         else:
             count = 0
-            while count < 2 :
+            while count < 2:
                 message, _ = receive_message(notified_socket)
                 if message is None:
                     # try receive again
