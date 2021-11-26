@@ -30,12 +30,12 @@ def find_length(x):
     return byte_length
 
 def get_datetime():
-    # time_stamp = datetime.datetime.utcnow().strftime('%Y%m%d%H%M%S')
-    # time_stamp_hex = hex(int(time_stamp))
-    time_stamp = datetime.datetime.now()
-    unix_time_stamp = time.mktime(time_stamp.timetuple())
-    time_stamp_hex = hex(int(unix_time_stamp))
-    return time_stamp_hex[2:]
+    time_stamp = int(time.time())
+    # print(datetime.datetime.fromtimestamp(time_stamp).strftime('%Y-%m-%d %H:%M:%S'))
+    time_stamp_hex = hex(time_stamp)
+    #Convert Hex to "Low to High", Hex per byte = 2
+    time_stamp_hex_invert = "".join(reversed([time_stamp_hex[i:i + 2] for i in range(2, len(time_stamp_hex), 2)]))
+    return time_stamp_hex_invert
 
 def login_response(device_id, ip= '35.240.241.234', port="1234"):
     #4040 is in Hexadecimal
@@ -48,13 +48,12 @@ def login_response(device_id, ip= '35.240.241.234', port="1234"):
     port_hex = int_to_hexstring(port,low_to_high=True, len_string=4)
     utc_time = get_datetime()
 
-    #TODO
     crc_util = CRC()
     # hexstring to bytesarray
     data_for_crc = header + package_length + version + device_id + command_type + ip_hex + port_hex + utc_time
     print(data_for_crc)
     data_for_crc = unhexlify(data_for_crc)
-    crc = crc_util.make_crc(data_for_crc)
+    crc = crc_util.make_crc(data_for_crc, len(data_for_crc))
     print(crc)
     tail = '0D0A'
 
@@ -82,16 +81,18 @@ if __name__ == "__main__":
     #
     # print(unhexlify(x+device_id.hex()))
     #
-    time_stamp = datetime.datetime.now()
-    print(time_stamp)
-
-    unix_time_stamp = time.mktime(time_stamp.timetuple())
-    print("unix_timestamp => ", unix_time_stamp)
-
-    time_stamp_hex = hex(int(unix_time_stamp))
-    print(time_stamp_hex)
+    # time_stamp = datetime.datetime.now()
+    # print(time_stamp)
+    #
+    # unix_time_stamp = time.mktime(time_stamp.timetuple())
+    # print("unix_timestamp => ", unix_time_stamp)
+    #
+    # time_stamp_hex = hex(int(unix_time_stamp))
+    # print(time_stamp_hex)
     # print(get_datetime())
     # print(unhexlify(get_datetime()))
     #original package = 404029000431303031313132353239393837000000000000009001FFFFFFFF0000C1DE7952A5DD0D0A
 
-    # print(login_response("1001112529987", ip="255.255.255.255", port=0000))
+    # print(get_datetime())
+
+    print(login_response("1001112529987", ip="255.255.255.255", port=0000))

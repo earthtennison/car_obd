@@ -71,6 +71,11 @@ def decode_stat_data(data):
 
     return stat_data
 
+def get_stat_data():
+    input_data = "C1F06952FDF069529C91110000000000698300000C0000000000036401014C000300"
+    stat_data = decode_stat_data(input_data)
+    return stat_data
+
 if __name__ == "__main__":
     input_data = "C1F06952FDF069529C91110000000000698300000C0000000000036401014C000300"
     stat_data = decode_stat_data(input_data)

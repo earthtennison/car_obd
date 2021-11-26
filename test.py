@@ -53,5 +53,6 @@ print(hex_to_ascii("3130303131313235323939383700000000000000"))
 
 print(int_to_hexstring(0000))
 print(bytes.fromhex("ab4858"))
+print("123".zfill(5))
 
 
