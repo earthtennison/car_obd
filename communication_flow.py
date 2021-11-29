@@ -16,6 +16,7 @@ clients = {}
 
 print("Listening for connections on {}:{}...".format(IP, PORT))
 
+
 def bytes_to_hex(bs):
     h = ""
     for b in bs:
@@ -23,9 +24,10 @@ def bytes_to_hex(bs):
         h += ("0" * (2 - len(bh))) + bh
     return h
 
+
 def hex_to_int(h, is_low_to_high=True):
     HEX_PER_BYTE = 2
-    if len(h)>2 and h[:2] == "0x":
+    if len(h) > 2 and h[:2] == "0x":
         if is_low_to_high == True:
             h = h[:2] + "".join(reversed([h[i:i + 2] for i in range(2, len(h), 2)]))
         return int(h, 0)
@@ -33,6 +35,7 @@ def hex_to_int(h, is_low_to_high=True):
         if is_low_to_high == True:
             h = "".join(reversed([h[i:i + 2] for i in range(0, len(h), 2)]))
         return int(h, 16)
+
 
 def hex_to_ascii(h):
     bytes_object = bytes.fromhex(h)
@@ -48,7 +51,7 @@ def receive_message(client_socket):
         # print(bytes_to_hex(header))
         head = bytes_to_hex(header[:2])
         if head != "4040":
-            return None, None
+            return None, None, None
         message_length = hex_to_int(bytes_to_hex(header[2:4]))
         version = bytes_to_hex(header[4:5])
         device_id = (header[5:25]).decode().strip()
@@ -60,8 +63,8 @@ def receive_message(client_socket):
 
     except Exception as e:
         print(e)
-        return False, False
-    
+        return False, False, False
+
 
 while True:
     # wait until socket is ready to read
@@ -95,9 +98,9 @@ while True:
         # else the socket send new message
         else:
             count = 0
-            message=None
+            message = None
             while count < 2:
-                header_message, message, device_id= receive_message(notified_socket)
+                header_message, message, device_id = receive_message(notified_socket)
                 if message is None:
                     # try receive again
                     # print("found no header find header again")
@@ -116,5 +119,4 @@ while True:
                 del clients[notified_socket]
             elif message is not None:
                 device_id = clients[notified_socket]
-                print("Received message from {} :\nheader:{}\npayload:{}".format(device_id,header_message, message))
-
+                print("Received message from {} :\nheader:{}\npayload:{}".format(device_id, header_message, message))

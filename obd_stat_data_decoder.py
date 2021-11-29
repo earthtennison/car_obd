@@ -77,7 +77,7 @@ def get_stat_data():
     return stat_data
 
 if __name__ == "__main__":
-    input_data = "C1F06952FDF069529C91110000000000698300000C0000000000036401014C000300"
+    input_data = "146ba461ff6fa461c32301000000000021030000000000020400003b4f7c15000004"
     stat_data = decode_stat_data(input_data)
     print(stat_data)
 
