@@ -83,6 +83,7 @@ def decode_gps_data(data):
 
 
 if __name__ == "__main__":
-    input_data = "01190A0D04121A1480D60488C5721800000000AF"
+    # input_data = "01190A0D04121A1480D60488C5721800000000AF"
+    input_data =   "011d0b15060f1ce8c7ec02b8e38a1500009a015f"
     gps_data = decode_gps_data(input_data)
     print(gps_data)

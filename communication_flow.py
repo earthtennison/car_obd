@@ -91,7 +91,7 @@ while True:
             clients[client_socket] = device_id
 
             # send heartbeat login package
-            send_data = login_response(device_id, ip="35.240.241.234", port=1234)
+            send_data = login_response(device_id, ip="255.255.255.255", port=0000)
             print("send_data", send_data)
             client_socket.send(send_data)
 
