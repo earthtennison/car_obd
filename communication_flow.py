@@ -2,6 +2,9 @@ import socket
 import select
 from login_response import login_response
 from heartbeat_response import heartbeat_response
+from obd_stat_data_decoder import decode_stat_data
+from obd_gps_decoder import decode_gps_data
+from obd_pid_decoder import decode_pid_data, decode_pid_type
 
 IP = "0.0.0.0"
 PORT = 1234
@@ -58,11 +61,43 @@ def receive_message(client_socket):
 
         message = client_socket.recv(message_length - 27)
         message = bytes_to_hex(message)
+
+        # TODO check crc
+
         return header_hex, message, (message_length, version, device_id, command_type)
 
     except Exception as e:
         print(e)
         return False, False, False
+
+
+def interpret_login_message(payload):
+    data = {}
+    stat_data = decode_stat_data(payload[0:34 * 2])
+    gps_data = decode_gps_data(payload[34 * 2:54 * 2])
+    data["stat_data"] = stat_data
+    data["gps_data"] = gps_data
+    return data
+
+
+def interpret(payload, command_type):
+    """interpret payload in hexstring"""
+    data = {}
+    if command_type == "4002":
+        stat_data = decode_stat_data(payload[0:34 * 2])
+        sample_rate = hex_to_int(payload[34 * 2:36 * 2])
+        pid_type_count = hex_to_int(payload[36 * 2:37 * 2])
+        pid_type_array = decode_pid_type(payload[37 * 2:(37 + pid_type_count * 2) * 2])
+        n = (37 + pid_type_count * 2)
+        pid_group_count = hex_to_int(payload[n * 2: (n + 1) * 2])
+        pid_group_size = hex_to_int(payload[(n + 1) * 2: (n + 2) * 2])
+        m = n + 2
+        pid_data = decode_pid_data(payload[m * 2: (m + pid_group_count * pid_group_size) * 2], pid_type_array)
+
+        data["stat_data"] = stat_data
+        data["pid_data"] = pid_data
+
+    return data
 
 
 if __name__ == "__main__":
@@ -92,13 +127,19 @@ if __name__ == "__main__":
                 # device_id contains 13 digits
                 clients[client_socket] = device_id
 
+                # interpret data
+                interpret_data = interpret_login_message(login_message)
+                # TODO push to cloud
+                if interpret_data:
+                    print("[{}] push to cloud: {}".format(metadata[3], interpret_data))
+
                 # send heartbeat login package 9001
                 # use Sinocastel's recommendation default ip and port
                 login_res = login_response(device_id, ip="255.255.255.255", port=0000)
                 print("Login response: ", login_res)
                 client_socket.send(login_res)
 
-                print('- '*40)
+                print('- ' * 40)
 
             # else the socket send new message
             else:
@@ -116,16 +157,22 @@ if __name__ == "__main__":
 
                 if message is not None:
                     device_id = clients[notified_socket]
-                    print("Received message from {} :\nheader:{}\npayload:{}".format(metadata[2], header_message, message))
+                    # print("Received message from {} :\nheader:{}\npayload:{}".format(metadata[2], header_message,
+                    #                                                                  message))
                     print('- ' * 40)
 
                     # TODO  interpret data
+                    interpret_data = interpret(message, metadata[3])
+                    if interpret_data:
+                        print("[{}] push to cloud: {}".format(metadata[3], interpret_data))
 
                     # check if it heartbeat package 1003 (send every 2 minutes)
                     # send heartbeat response package 9003
                     if metadata[3] == "1003":
                         heartbeat_res = heartbeat_response(metadata[2])
                         notified_socket.send(heartbeat_res)
+
+                    # TODO push data to cloud
 
 
                 elif message is False:
