@@ -63,8 +63,9 @@ def bytes_to_hex(bs):
 # print(bytes.fromhex("ab4858"))
 # print("123".zfill(5))
 #
-# print(time.time())
+print(time.time())
 
-print(bytes_to_hex(b'@@)\x00\x041001112529987\x00\x00\x00\x00\x00\x00\x00\x90\x01\xff\xff\xff\xff\x00\x00;z\xa4a\xcd\xf6\r\n'))
+# print(bytes_to_hex(b'@@)\x00\x041001112529987\x00\x00\x00\x00\x00\x00\x00\x90\x01\xff\xff\xff\xff\x00\x00;z\xa4a\xcd\xf6\r\n'))
 
+print(time.time())
 
