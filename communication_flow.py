@@ -1,11 +1,18 @@
 import socket
 import select
+import config
 from login_response import login_response
 from heartbeat_response import heartbeat_response
 from obd_stat_data_decoder import decode_stat_data
 from obd_gps_decoder import decode_gps_data
 from obd_pid_decoder import decode_pid_data, decode_pid_type
+from database_management import Cosmos_DB
 
+
+HOST = config.settings['host']
+MASTER_KEY = config.settings['master_key']
+DATABASE_ID = config.settings['database_id']
+CONTAINER_ID = config.settings['container_id']
 IP = "0.0.0.0"
 PORT = 1234
 
@@ -101,7 +108,7 @@ def interpret(payload, command_type):
 
 
 if __name__ == "__main__":
-
+    cosmos = Cosmos_DB(HOST,MASTER_KEY,DATABASE_ID,CONTAINER_ID)
     while True:
         # wait until socket is ready to read
         read_sockets, _, exception_sockets = select.select(sockets_list, [], sockets_list)
@@ -132,6 +139,8 @@ if __name__ == "__main__":
                 # TODO push to cloud
                 if interpret_data:
                     print("[{}] push to cloud: {}".format(metadata[3], interpret_data))
+                    interpret_data['package'] = metadata[3]
+                    cosmos.upsert_item(interpret_data)
 
                 # send heartbeat login package 9001
                 # use Sinocastel's recommendation default ip and port
@@ -163,8 +172,10 @@ if __name__ == "__main__":
 
                     # TODO  interpret data
                     interpret_data = interpret(message, metadata[3])
+                    interpret_data["package"] = metadata[3]
                     if interpret_data:
                         print("[{}] push to cloud: {}".format(metadata[3], interpret_data))
+                        cosmos.upsert_item(interpret_data)
 
                     # check if it heartbeat package 1003 (send every 2 minutes)
                     # send heartbeat response package 9003

@@ -24,7 +24,7 @@ class Cosmos_DB():
 
         # setup container 
         try:
-            self.container = self.database.create_container(id=CONTAINER_ID, partition_key=PartitionKey(path='/id'))
+            self.container = self.database.create_container(id=CONTAINER_ID, partition_key=PartitionKey(path='/package'))
         except exceptions.CosmosResourceExistsError:
             self.container = self.database.get_container_client(CONTAINER_ID)
         except exceptions.CosmosHttpResponseError:
@@ -62,19 +62,16 @@ class Cosmos_DB():
 
 def main():
     database = Cosmos_DB(HOST,MASTER_KEY,DATABASE_ID,CONTAINER_ID)
-    database.upsert_item({ 'id' : '1',
-                        'last_accon_time': '2013-10-25 04:17:05',
-                        'UTC_Time': '2013-10-25 04:18:05', 
-                        'total_trip_mileage': 1151388, 
-                        'current_trip_mileage': 0, 
-                        'total_fuel': 33641, 
-                        'current_fuel': 12, 
-                        'vstate': '00000000', 
-                        'reserved': '036401014C000300'})
+    # database.upsert_item({ 'id' : '1',
+    #                     'last_accon_time': '2013-10-25 04:17:05',
+    #                     'UTC_Time': '2013-10-25 04:18:05', 
+    #                     'total_trip_mileage': 1151388, 
+    #                     'current_trip_mileage': 0, 
+    #                     'total_fuel': 33641, 
+    #                     'current_fuel': 12, 
+    #                     'vstate': '00000000', 
+    #                     'reserved': '036401014C000300'})
 
 if __name__ == '__main__':
     main()
 
-#Send Delete Receive, Class 
-#Question to Ask
-# what should be our partitionKey
