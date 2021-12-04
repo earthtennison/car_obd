@@ -32,12 +32,11 @@ class Cosmos_DB():
             raise
 
     def query_item(self,package_num):
-        query = 'SELECT TOP 1 * FROM c where c.package="{}" ORDER BY c.time DESC'.format(str(package_num))
+        query = 'SELECT TOP 1 * FROM c where c.package="{}" ORDER BY c._ts DESC'.format(str(package_num))
         return self.container.query_items(query, enable_cross_partition_query=True) 
         
     def upsert_item(self,data):
         print('Upserting Items')
-        data['time'] = time.time()
         self.container.upsert_item(body=data)
     
     def delete_item(self, doc_id,sql):
