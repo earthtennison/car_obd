@@ -2,6 +2,7 @@ import azure.cosmos.cosmos_client as cosmos_client
 import azure.cosmos.exceptions as exceptions
 from azure.cosmos.partition_key import PartitionKey
 import config
+import time
 
 
 HOST = config.settings['host']
@@ -11,7 +12,7 @@ CONTAINER_ID = config.settings['container_id']
 
 class Cosmos_DB():
 
-    def __init__(self,host,master_key,database_id,container_id):
+    def __init__(self,host=HOST,master_key=MASTER_KEY,database_id=DATABASE_ID,container_id=CONTAINER_ID):
 
         #Create Client
         self.client = cosmos_client.CosmosClient(host, {'masterKey': master_key} )
@@ -29,28 +30,14 @@ class Cosmos_DB():
             self.container = self.database.get_container_client(CONTAINER_ID)
         except exceptions.CosmosHttpResponseError:
             raise
-    
-    def read_item(self, doc_id):
-        print('\nReading Item by Id\n')
-        # Note that Reads require a partition key to be spcified.
-        response = self.container.read_item(item=doc_id, partition_key=doc_id)
-        print(response)
-       
 
-
-    def read_items(self):
-        print('\nReading all items in a container\n')
-
-        # NOTE: Use MaxItemCount on Options to control how many items come back per trip to the server
-        #       Important to handle throttles whenever you are doing operations such as this that might
-        #       result in a 429 (throttled request)
-        item_list = list(self.container.read_all_items(max_item_count=10))
-        print('Found {0} items'.format(item_list.__len__()))
-        for doc in item_list:
-            print('Item Id: {0}'.format(doc.get('id')))
-    
+    def query_item(self,package_num):
+        query = 'SELECT TOP 1 * FROM c where c.package="{}" ORDER BY c.time DESC'.format(str(package_num))
+        return self.container.query_items(query, enable_cross_partition_query=True) 
+        
     def upsert_item(self,data):
-        print('Upserting Items')  
+        print('Upserting Items')
+        data['time'] = time.time()
         self.container.upsert_item(body=data)
     
     def delete_item(self, doc_id,sql):
