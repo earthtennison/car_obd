@@ -99,10 +99,16 @@ def interpret(payload, command_type):
         pid_group_count = hex_to_int(payload[n * 2: (n + 1) * 2])
         pid_group_size = hex_to_int(payload[(n + 1) * 2: (n + 2) * 2])
         m = n + 2
-        pid_data = decode_pid_data(payload[m * 2: (m + pid_group_count * pid_group_size) * 2], pid_type_array)
+        # pid_data = decode_pid_data(payload[m * 2: (m + pid_group_count * pid_group_size) * 2], pid_type_array)
 
         data["stat_data"] = stat_data
-        data["pid_data"] = pid_data
+        # data["pid_data"] = pid_data
+
+    elif command_type == "4001":
+        stat_data = decode_stat_data(payload[0:34 * 2])
+        # TODO interpret gps data
+
+        data["stat_data"] = stat_data
 
     return data
 
