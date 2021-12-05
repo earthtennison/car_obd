@@ -105,7 +105,8 @@ def interpret(payload, command_type):
         # data["pid_data"] = pid_data
 
     elif command_type == "4001":
-        stat_data = decode_stat_data(payload[0:34 * 2])
+
+        stat_data = decode_stat_data(payload[1 * 2:35 * 2])
         # TODO interpret gps data
 
         data["stat_data"] = stat_data
