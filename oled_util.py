@@ -6,7 +6,7 @@ from PIL import Image, ImageDraw, ImageFont
 
 class OLED:
     
-    def __init__(self, width=128, height=64, addr=0x3c, font_path="font/Minicradft.ttf"):
+    def __init__(self, width=128, height=64, addr=0x3c, font_path="font/Minecraft.ttf"):
         i2c = busio.I2C(board.SCL, board.SDA)
 
         # initialize oled
@@ -53,16 +53,19 @@ class OLED:
         font = ImageFont.truetype(self.font_path, 15)
         self.draw.text((5,5), title, font=font, fill=0)
         
-        font = ImageFont.truetype(self.font_path, 40)
+        if type(value) != "str":
+            value = str(value)
+        font = ImageFont.truetype(self.font_path, 30)
         (font_width, font_height) = font.getsize(value)
         self.draw.text((self.oled.width//2 - font_width//2, self.oled.height//2 - font_height//2),
                        value, font=font, fill=0)
         
         font = ImageFont.truetype(self.font_path, 15)
-        self.draw.text((self.oled.width//2 + font_width//2 + 5, self.oled.height//2 + font_height//2),
+        (font_width, font_height) = font.getsize(unit)
+        self.draw.text((self.oled.width - font_width - 5, self.oled.height - font_height - 5),
                        unit, font=font, fill=0)
         self.display()
-        
+    
         
     def display(self):
         # Display image
@@ -70,11 +73,12 @@ class OLED:
         self.oled.show()
         
     def clear(self):
-        # Clear display
-        self.oled.fill(0)
-        self.oled.show()
+        # Draw a white background
+        self.draw.rectangle((0, 0, self.oled.width, self.oled.height), outline=255, fill=255)
+        self.display()
 
 if __name__ == "__main__":
     o = OLED()
     #o.write("rpm\n20")
     o.write_gauge("traveled", "20", "km")
+    #o.clear()
